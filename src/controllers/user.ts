@@ -28,9 +28,6 @@ export let getLogin = (req: Request, res: Response) => {
  * Sign in using email and password.
  */
 export let postLogin = (req: Request, res: Response, next: NextFunction) => {
-  req.assert("email", "Email is not valid").isEmail();
-  req.assert("password", "Password cannot be blank").notEmpty();
-  req.sanitize("email").normalizeEmail({ gmail_remove_dots: false });
 
   const errors = req.validationErrors();
 
@@ -80,10 +77,6 @@ export let getSignup = (req: Request, res: Response) => {
  * Create a new local account.
  */
 export let postSignup = (req: Request, res: Response, next: NextFunction) => {
-  req.assert("email", "Email is not valid").isEmail();
-  req.assert("password", "Password must be at least 4 characters long").len({ min: 4 });
-  req.assert("confirmPassword", "Passwords do not match").equals(req.body.password);
-  req.sanitize("email").normalizeEmail({ gmail_remove_dots: false });
 
   const errors = req.validationErrors();
 
@@ -130,8 +123,6 @@ export let getAccount = (req: Request, res: Response) => {
  * Update profile information.
  */
 export let postUpdateProfile = (req: Request, res: Response, next: NextFunction) => {
-  req.assert("email", "Please enter a valid email address.").isEmail();
-  req.sanitize("email").normalizeEmail({ gmail_remove_dots: false });
 
   const errors = req.validationErrors();
 
@@ -166,9 +157,6 @@ export let postUpdateProfile = (req: Request, res: Response, next: NextFunction)
  * Update current password.
  */
 export let postUpdatePassword = (req: Request, res: Response, next: NextFunction) => {
-  req.assert("password", "Password must be at least 4 characters long").len({ min: 4 });
-  req.assert("confirmPassword", "Passwords do not match").equals(req.body.password);
-
   const errors = req.validationErrors();
 
   if (errors) {
@@ -246,9 +234,6 @@ export let getReset = (req: Request, res: Response, next: NextFunction) => {
  * Process the reset password request.
  */
 export let postReset = (req: Request, res: Response, next: NextFunction) => {
-  req.assert("password", "Password must be at least 4 characters long.").len({ min: 4 });
-  req.assert("confirm", "Passwords must match.").equals(req.body.password);
-
   const errors = req.validationErrors();
 
   if (errors) {
@@ -321,9 +306,6 @@ export let getForgot = (req: Request, res: Response) => {
  * Create a random token, then the send user an email with a reset link.
  */
 export let postForgot = (req: Request, res: Response, next: NextFunction) => {
-  req.assert("email", "Please enter a valid email address.").isEmail();
-  req.sanitize("email").normalizeEmail({ gmail_remove_dots: false });
-
   const errors = req.validationErrors();
 
   if (errors) {

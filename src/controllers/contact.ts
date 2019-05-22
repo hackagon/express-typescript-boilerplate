@@ -24,14 +24,10 @@ export let getContact = (req: Request, res: Response) => {
  * Send a contact form via Nodemailer.
  */
 export let postContact = (req: Request, res: Response) => {
-  req.assert("name", "Name cannot be blank").notEmpty();
-  req.assert("email", "Email is not valid").isEmail();
-  req.assert("message", "Message cannot be blank").notEmpty();
 
   const errors = req.validationErrors();
 
   if (errors) {
-    req.flash("errors", errors);
     return res.redirect("/contact");
   }
 
@@ -44,10 +40,8 @@ export let postContact = (req: Request, res: Response) => {
 
   transporter.sendMail(mailOptions, (err) => {
     if (err) {
-      req.flash("errors", { msg: err.message });
       return res.redirect("/contact");
     }
-    req.flash("success", { msg: "Email has been sent successfully!" });
     res.redirect("/contact");
   });
 };
