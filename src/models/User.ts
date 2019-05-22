@@ -1,24 +1,19 @@
 import bcrypt from "bcrypt-nodejs";
 import crypto from "crypto";
 import mongoose from "mongoose";
-// import { NextFunction } from 'express';
+import { NextFunction } from "express";
+import * as _ from "lodash";
 
 export type UserDocument = mongoose.Document & {
-  email: string,
+  username: string,
   password: string,
-  passwordResetToken: string,
-  passwordResetExpires: Date,
-
-  facebook: string,
-  tokens: AuthToken[],
-
-  profile: {
-    name: string,
-    gender: string,
-    location: string,
-    website: string,
-    picture: string
-  },
+  email: string,
+  phone: string,
+  userType: string,
+  level: number,
+  registerDate: Date,
+  updateAt: Date,
+  isActive: boolean,
 
   comparePassword: comparePasswordFunction,
   gravatar: (size: number) => string
@@ -32,40 +27,33 @@ export type AuthToken = {
 };
 
 const userSchema = new mongoose.Schema({
-  email: { type: String, unique: true },
-  password: String,
-  passwordResetToken: String,
-  passwordResetExpires: Date,
-
-  facebook: String,
-  twitter: String,
-  google: String,
-  tokens: Array,
-
-  profile: {
-    name: String,
-    gender: String,
-    location: String,
-    website: String,
-    picture: String
-  }
+  username: {type: String, unique: true, required: true},
+  password: {type: String},
+  email: { type: String, unique: true, required: true },
+  phone: { type: String, unique: true, required: true },
+  userType: { type: String, default: "normal" },
+  level: { type: Number, required: true },
+  registerDate: { type: Date, default: new Date() },
+  updateAt: { type: Date },
+  isActive: { type: Boolean, default: false },
 }, { timestamps: true });
 
 /**
  * Password hash middleware.
  */
-// userSchema.pre("save", function save(next: NextFunction) {
-//   const user = this;
-//   if (!user.isModified("password")) { return next(); }
-//   bcrypt.genSalt(10, (err, salt) => {
-//     if (err) { return next(err); }
-//     bcrypt.hash(user.password, salt, undefined, (err: mongoose.Error, hash) => {
-//       if (err) { return next(err); }
-//       user.password = hash;
-//       next();
-//     });
-//   });
-// });
+userSchema.pre("save", function save(next: NextFunction) {
+  const user = this as UserDocument;
+  if (!user.isModified("password")) { return next(); }
+
+  bcrypt.genSalt(10, (err, salt) => {
+    if (err) { return next(err); }
+    bcrypt.hash(_.get(user, "password"), salt, undefined, (err: mongoose.Error, hash) => {
+      if (err) { return next(err); }
+      user.password = hash;
+      next();
+    });
+  });
+});
 
 const comparePassword: comparePasswordFunction = function (candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, (err: mongoose.Error, isMatch: boolean) => {
